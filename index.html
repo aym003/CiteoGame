@@ -1,10 +1,264 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Tri des Déchets</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+    <!-- Firebase compat SDK (no bundler needed) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; background: #111; }
+
+        /* ── Loader ──────────────────────────────────────────── */
+        #loader {
+            position: fixed; inset: 0; z-index: 9999;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: #1a2a4a; gap: 22px;
+            transition: opacity 0.4s;
+        }
+        #loader.hidden { opacity: 0; pointer-events: none; }
+        .spinner {
+            width: 52px; height: 52px;
+            border: 6px solid #334477;
+            border-top-color: #FDC602;
+            border-radius: 50%;
+            animation: spin 0.85s linear infinite;
+        }
+        #loader p { font-family: 'Press Start 2P', monospace; font-size: 9px; color: #aaddff; margin: 0; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Leaderboard overlay ─────────────────────────────── */
+        #lb-overlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 200;
+            align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.88);
+            animation: fadeIn 0.35s ease;
+        }
+        #lb-overlay.visible { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        #lb-box {
+            background: #0d1b36;
+            border: 3px solid #FDC602;
+            border-radius: 10px;
+            padding: 26px 28px;
+            width: min(500px, 92vw);
+            max-height: 88vh;
+            overflow-y: auto;
+            display: flex; flex-direction: column; gap: 16px;
+            color: #fff;
+            font-family: 'Press Start 2P', monospace;
+        }
+        #lb-box h2   { margin: 0; font-size: 12px; color: #FDC602; text-align: center; }
+        #lb-score    { margin: 0; font-size: 10px; color: #aaffcc; text-align: center; }
+
+        #lb-form     { display: flex; gap: 8px; }
+        #lb-name     {
+            flex: 1; padding: 10px 12px;
+            font-family: 'Press Start 2P', monospace; font-size: 9px;
+            background: #1e3060; color: #fff;
+            border: 2px solid #445588; border-radius: 5px; outline: none;
+        }
+        #lb-name:focus { border-color: #FDC602; }
+        #lb-submit   {
+            padding: 10px 14px;
+            font-family: 'Press Start 2P', monospace; font-size: 8px;
+            background: #1a9830; color: #fff;
+            border: none; border-radius: 5px; cursor: pointer; white-space: nowrap;
+        }
+        #lb-submit:hover:not(:disabled) { background: #22cc44; }
+        #lb-submit:disabled { background: #334477; cursor: default; opacity: 0.7; }
+
+        #lb-msg { font-size: 7px; text-align: center; min-height: 12px; }
+
+        #lb-table { width: 100%; border-collapse: collapse; font-size: 7px; }
+        #lb-table th { color: #FDC602; padding: 6px 4px; border-bottom: 2px solid #334477; text-align: left; }
+        #lb-table td { padding: 7px 4px; border-bottom: 1px solid #1e3060; }
+        #lb-table tr.me td { color: #FFD700; background: #1a2a4a; }
+        .rank { color: #888; width: 24px; }
+        .pts  { color: #00FF88; text-align: right; }
+        .lb-empty { text-align: center; color: #666; padding: 14px 0; font-size: 7px; }
+
+        #lb-play {
+            align-self: center; margin-top: 4px;
+            padding: 12px 28px;
+            font-family: 'Press Start 2P', monospace; font-size: 10px;
+            background: #1155CC; color: #fff;
+            border: none; border-radius: 5px; cursor: pointer;
+        }
+        #lb-play:hover { background: #2266EE; }
+    </style>
 </head>
 <body>
-$END$
+
+<!-- Loader — shown while Phaser preloads assets -->
+<div id="loader">
+    <div class="spinner"></div>
+    <p>Chargement…</p>
+</div>
+
+<!-- End-of-game overlay: pseudonym input + leaderboard -->
+<div id="lb-overlay">
+    <div id="lb-box">
+        <h2>🏆 Classement</h2>
+        <p id="lb-score"></p>
+        <div id="lb-form">
+            <input id="lb-name" type="text" maxlength="20" placeholder="Votre pseudo…"
+                   autocomplete="off" spellcheck="false">
+            <button id="lb-submit">Envoyer</button>
+        </div>
+        <p id="lb-msg"></p>
+        <table id="lb-table">
+            <thead><tr><th>#</th><th>Pseudo</th><th>Score</th></tr></thead>
+            <tbody id="lb-body"></tbody>
+        </table>
+        <button id="lb-play">▶ Rejouer</button>
+    </div>
+</div>
+
+<script src="firebase-config.js"></script>
+<script>
+// Firebase config is loaded from firebase-config.js (gitignored).
+// See firebase-config.example.js for the required shape.
+// In CI the file is generated from GitHub Actions secrets.
+
+const firebaseConfig = window.FIREBASE_CONFIG || {};
+
+let db = null;
+let firebaseReady = false;
+
+try {
+    if (firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('REPLACE')) {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        firebaseReady = true;
+    }
+} catch (e) {
+    console.warn('Firebase init failed — leaderboard disabled.', e);
+}
+
+const COLLECTION = 'scores';
+
+function esc(s) {
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+async function fetchTop10() {
+    const snap = await db.collection(COLLECTION)
+        .orderBy('score', 'desc')
+        .limit(10)
+        .get();
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+function toDocId(name) {
+    return name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9_-]/g, '_');
+}
+
+async function submitScore(name, score) {
+    await db.collection(COLLECTION).doc(toDocId(name)).set({
+        name,
+        score,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+}
+
+function renderLeaderboard(rows, myName) {
+    const tbody = document.getElementById('lb-body');
+    if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="3" class="lb-empty">Aucun score encore</td></tr>';
+        return;
+    }
+    tbody.innerHTML = rows.map((r, i) => `
+        <tr${r.name === myName ? ' class="me"' : ''}>
+            <td class="rank">${i + 1}</td>
+            <td>${esc(r.name)}</td>
+            <td class="pts">${r.score} pts</td>
+        </tr>
+    `).join('');
+}
+
+// Called by game.js once endGame() animations have played
+window.showLeaderboard = async function(finalScore, onReplay) {
+    const overlay   = document.getElementById('lb-overlay');
+    const scoreEl   = document.getElementById('lb-score');
+    const nameInput = document.getElementById('lb-name');
+    const submitBtn = document.getElementById('lb-submit');
+    const msgEl     = document.getElementById('lb-msg');
+    const playBtn   = document.getElementById('lb-play');
+    const tbody     = document.getElementById('lb-body');
+    const table     = document.getElementById('lb-table');
+
+    // Reset
+    scoreEl.textContent = `Votre score : ${finalScore} pts`;
+    msgEl.textContent   = '';
+    msgEl.style.color   = '#aaddff';
+    nameInput.value     = '';
+    submitBtn.disabled  = false;
+    tbody.innerHTML     = '';
+
+    overlay.classList.add('visible');
+
+    if (!firebaseReady) {
+        table.style.display    = 'none';
+        submitBtn.disabled     = true;
+        msgEl.style.color      = '#ff9966';
+        msgEl.textContent      = '⚠ Config Firebase manquante';
+    } else {
+        table.style.display = '';
+        tbody.innerHTML = '<tr><td colspan="3" class="lb-empty">Chargement…</td></tr>';
+        try {
+            renderLeaderboard(await fetchTop10(), null);
+        } catch (e) {
+            tbody.innerHTML = '<tr><td colspan="3" class="lb-empty" style="color:#c55">Erreur de chargement</td></tr>';
+        }
+
+        const doSubmit = async () => {
+            const name = nameInput.value.trim();
+            if (!name) {
+                msgEl.style.color = '#ff9966';
+                msgEl.textContent = 'Entrez un pseudo !';
+                return;
+            }
+            submitBtn.disabled = true;
+            msgEl.style.color  = '#aaddff';
+            msgEl.textContent  = 'Envoi…';
+            try {
+                await submitScore(name, finalScore);
+                msgEl.style.color = '#aaffcc';
+                msgEl.textContent = '✓ Score enregistré !';
+                renderLeaderboard(await fetchTop10(), name);
+                nameInput.disabled = true;
+            } catch (e) {
+                msgEl.style.color  = '#ff6666';
+                msgEl.textContent  = 'Erreur réseau — réessayez.';
+                submitBtn.disabled = false;
+            }
+        };
+
+        submitBtn.onclick   = doSubmit;
+        nameInput.onkeydown = e => { if (e.key === 'Enter') doSubmit(); };
+    }
+
+    nameInput.focus();
+
+    playBtn.onclick = () => {
+        overlay.classList.remove('visible');
+        nameInput.disabled = false;
+        onReplay();
+    };
+};
+</script>
+
+<script src="game.js"></script>
 </body>
 </html>

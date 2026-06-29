@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <!-- Box body -->
+  <rect x="10" y="32" width="60" height="44" rx="2" fill="#C8853A"/>
+  <!-- Left flap (open, tilted back) -->
+  <polygon points="10,32 36,18 36,32" fill="#DDAA55"/>
+  <!-- Right flap (open, tilted back) -->
+  <polygon points="44,18 70,32 44,32" fill="#B07030"/>
+  <!-- Tape strip vertical -->
+  <rect x="36" y="18" width="8" height="58" fill="#F0D468" opacity="0.8"/>
+  <!-- Horizontal crease -->
+  <line x1="10" y1="55" x2="70" y2="55" stroke="#9A6020" stroke-width="1.5" opacity="0.55"/>
+  <!-- Box outline -->
+  <rect x="10" y="32" width="60" height="44" rx="2" fill="none" stroke="#8A5818" stroke-width="2"/>
+  <!-- Flap outlines -->
+  <polyline points="10,32 36,18 36,32" fill="none" stroke="#8A5818" stroke-width="1.5"/>
+  <polyline points="44,18 70,32 44,32" fill="none" stroke="#8A5818" stroke-width="1.5"/>
+</svg>

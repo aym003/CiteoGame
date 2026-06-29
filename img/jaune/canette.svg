@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 88">
+  <!-- Can body -->
+  <rect x="6" y="14" width="44" height="62" fill="#EE3333"/>
+  <!-- Top face -->
+  <ellipse cx="28" cy="14" rx="22" ry="6" fill="#D0D0D0"/>
+  <!-- Bottom face -->
+  <ellipse cx="28" cy="76" rx="22" ry="6" fill="#B8B8B8"/>
+  <!-- Label background -->
+  <rect x="6" y="20" width="44" height="50" fill="#EE3333"/>
+  <!-- Decorative stripe bottom -->
+  <rect x="6" y="58" width="44" height="8" fill="#CC1111"/>
+  <!-- Brand text -->
+  <text x="28" y="43" text-anchor="middle" fill="white" font-size="12" font-family="Arial Black, Arial" font-weight="bold">SODA</text>
+  <!-- Decorative stripe top -->
+  <rect x="6" y="22" width="44" height="5" fill="#FF5555" opacity="0.5"/>
+  <!-- Pull tab -->
+  <ellipse cx="28" cy="11" rx="7" ry="2.5" fill="#A8A8A8"/>
+  <path d="M22,11 Q28,5 34,11" fill="none" stroke="#909090" stroke-width="2" stroke-linecap="round"/>
+  <!-- Highlight -->
+  <rect x="8" y="20" width="5" height="50" rx="2" fill="white" opacity="0.18"/>
+  <!-- Top rim outline -->
+  <ellipse cx="28" cy="14" rx="22" ry="6" fill="none" stroke="#999" stroke-width="1.5"/>
+  <!-- Bottom rim outline -->
+  <ellipse cx="28" cy="76" rx="22" ry="6" fill="none" stroke="#999" stroke-width="1.5"/>
+</svg>

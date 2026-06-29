@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 90">
+  <!-- Can body -->
+  <rect x="10" y="26" width="28" height="56" rx="5" fill="#4488DD"/>
+  <!-- Shoulder taper -->
+  <path d="M10,32 Q10,18 24,14 Q38,18 38,32" fill="#3377CC"/>
+  <!-- Neck -->
+  <rect x="19" y="8" width="10" height="10" rx="2" fill="#AAAAAA"/>
+  <!-- Nozzle head -->
+  <rect x="15" y="2" width="18" height="10" rx="4" fill="#888888"/>
+  <!-- Spray tip -->
+  <rect x="30" y="4" width="8" height="4" rx="2" fill="#666666"/>
+  <!-- Spray particles -->
+  <circle cx="42" cy="4" r="2.5" fill="#AAEEFF" opacity="0.75"/>
+  <circle cx="46" cy="2" r="1.8" fill="#AAEEFF" opacity="0.55"/>
+  <circle cx="45" cy="8" r="1.5" fill="#AAEEFF" opacity="0.45"/>
+  <circle cx="48" cy="5" r="1.2" fill="#AAEEFF" opacity="0.35"/>
+  <!-- Bottom ellipse -->
+  <ellipse cx="24" cy="82" rx="14" ry="4" fill="#2255AA"/>
+  <!-- Label -->
+  <rect x="12" y="36" width="24" height="30" rx="2" fill="#2266CC" opacity="0.55"/>
+  <text x="24" y="52" text-anchor="middle" fill="white" font-size="6" font-family="Arial Black, Arial" font-weight="bold">SPRAY</text>
+  <text x="24" y="62" text-anchor="middle" fill="#AADDFF" font-size="9">♻</text>
+  <!-- Highlight -->
+  <rect x="12" y="28" width="5" height="52" rx="2" fill="white" opacity="0.2"/>
+  <!-- Body outline -->
+  <rect x="10" y="26" width="28" height="56" rx="5" fill="none" stroke="#2255AA" stroke-width="2"/>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 80">
+  <!-- Shadow -->
+  <ellipse cx="35" cy="77" rx="18" ry="3" fill="rgba(0,0,0,0.18)"/>
+  <!-- Stem -->
+  <rect x="33" y="7" width="4" height="11" rx="2" fill="#5A3010"/>
+  <!-- Leaf -->
+  <path d="M37,12 Q50,5 48,18 Q42,14 37,12 Z" fill="#33AA33"/>
+  <!-- Leaf vein -->
+  <path d="M37,12 Q44,12 48,18" fill="none" stroke="#228822" stroke-width="0.8"/>
+  <!-- Apple body -->
+  <path d="M35,15 C17,15 7,28 7,43 C7,60 18,72 35,72 C52,72 63,60 63,43 C63,28 53,15 35,15 Z" fill="#EE3333"/>
+  <!-- Top indent -->
+  <path d="M29,16 Q35,11 41,16" fill="none" stroke="#CC2020" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Highlight -->
+  <ellipse cx="22" cy="29" rx="7" ry="9" fill="white" opacity="0.22" transform="rotate(-12,22,29)"/>
+  <!-- Outline -->
+  <path d="M35,15 C17,15 7,28 7,43 C7,60 18,72 35,72 C52,72 63,60 63,43 C63,28 53,15 35,15 Z" fill="none" stroke="#BB2020" stroke-width="1.5"/>
+</svg>

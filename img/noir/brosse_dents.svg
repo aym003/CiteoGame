@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 35">
+  <!-- Shadow -->
+  <ellipse cx="50" cy="33" rx="40" ry="2.5" fill="rgba(0,0,0,0.18)"/>
+  <!-- Handle -->
+  <path d="M8,14 Q8,8 14,8 L68,8 Q74,8 74,14 L74,22 Q74,28 68,28 L14,28 Q8,28 8,22 Z" fill="#FF6699"/>
+  <!-- Handle highlight -->
+  <path d="M14,9 L68,9" stroke="rgba(255,255,255,0.4)" stroke-width="3" stroke-linecap="round"/>
+  <!-- Handle grip ridges -->
+  <rect x="20" y="11" width="4" height="14" rx="2" fill="#DD4477" opacity="0.5"/>
+  <rect x="28" y="11" width="4" height="14" rx="2" fill="#DD4477" opacity="0.5"/>
+  <rect x="36" y="11" width="4" height="14" rx="2" fill="#DD4477" opacity="0.5"/>
+  <!-- Head base -->
+  <path d="M74,12 L92,12 Q96,12 96,16 L96,20 Q96,24 92,24 L74,24 Z" fill="#FFFFFF"/>
+  <path d="M74,12 L92,12 Q96,12 96,16 L96,20 Q96,24 92,24 L74,24 Z" fill="none" stroke="#DDDDDD" stroke-width="1"/>
+  <!-- Bristles -->
+  <rect x="77" y="7" width="3" height="6" rx="1.5" fill="#FF6699"/>
+  <rect x="82" y="7" width="3" height="6" rx="1.5" fill="#FF6699"/>
+  <rect x="87" y="7" width="3" height="6" rx="1.5" fill="#FFFFFF" stroke="#DDDDDD" stroke-width="0.5"/>
+  <rect x="77" y="23" width="3" height="6" rx="1.5" fill="#FF6699"/>
+  <rect x="82" y="23" width="3" height="6" rx="1.5" fill="#FF6699"/>
+  <rect x="87" y="23" width="3" height="6" rx="1.5" fill="#FFFFFF" stroke="#DDDDDD" stroke-width="0.5"/>
+  <!-- Outline handle -->
+  <path d="M8,14 Q8,8 14,8 L68,8 Q74,8 74,14 L74,22 Q74,28 68,28 L14,28 Q8,28 8,22 Z" fill="none" stroke="#CC4477" stroke-width="1.5"/>
+</svg>

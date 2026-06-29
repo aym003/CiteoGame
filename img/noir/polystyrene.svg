@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75 85">
+  <!-- Shadow -->
+  <ellipse cx="37" cy="82" rx="22" ry="3" fill="rgba(0,0,0,0.18)"/>
+  <!-- Cup body -->
+  <path d="M18,22 L22,72 Q22,78 37,78 Q52,78 53,72 L57,22 Z" fill="#F2F2F2"/>
+  <!-- Cup top rim -->
+  <path d="M16,18 Q16,12 37,12 Q58,12 59,18 L57,22 L18,22 Z" fill="#E0E0E0"/>
+  <!-- Lid -->
+  <path d="M14,16 Q14,9 37,9 Q60,9 61,16 L59,20 Q59,22 37,22 Q15,22 16,20 Z" fill="#D8D8D8"/>
+  <!-- Lid rim raised edge -->
+  <ellipse cx="37" cy="9" rx="23" ry="4" fill="none" stroke="#BBBBBB" stroke-width="2"/>
+  <!-- Straw hole -->
+  <ellipse cx="45" cy="10" rx="3" ry="2" fill="#C0C0C0" stroke="#AAAAAA" stroke-width="0.8"/>
+  <!-- Straw -->
+  <rect x="43.5" y="2" width="3" height="20" rx="1.5" fill="#FF4488"/>
+  <!-- Texture dots on cup (foam texture) -->
+  <circle cx="27" cy="35" r="1" fill="#DDDDDD"/>
+  <circle cx="35" cy="40" r="1" fill="#DDDDDD"/>
+  <circle cx="44" cy="32" r="1" fill="#DDDDDD"/>
+  <circle cx="30" cy="50" r="1" fill="#DDDDDD"/>
+  <circle cx="46" cy="52" r="1" fill="#DDDDDD"/>
+  <circle cx="38" cy="58" r="1" fill="#DDDDDD"/>
+  <!-- Highlight -->
+  <path d="M22,28 Q21,50 23,65" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="3" stroke-linecap="round"/>
+  <!-- Outline -->
+  <path d="M18,22 L22,72 Q22,78 37,78 Q52,78 53,72 L57,22 Z" fill="none" stroke="#BBBBBB" stroke-width="1.5"/>
+</svg>

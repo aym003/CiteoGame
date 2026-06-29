@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 112">
+  <!-- Bottle body (green glass) -->
+  <path d="M10,54 C8,60 7,68 7,78 L7,98 C7,105 16,110 28,110 C40,110 49,105 49,98 L49,78 C49,68 48,60 46,54 Z" fill="#2A7830"/>
+  <!-- Shoulders -->
+  <path d="M20,36 C16,42 13,48 10,54 L46,54 C43,48 40,42 36,36 Z" fill="#2A7830"/>
+  <!-- Neck -->
+  <rect x="22" y="14" width="12" height="24" rx="2" fill="#2A7830"/>
+  <!-- Foil wrap -->
+  <rect x="19" y="5" width="18" height="11" rx="2" fill="#8B0000"/>
+  <!-- Cork top -->
+  <rect x="21" y="9" width="14" height="7" rx="1" fill="#C09060"/>
+  <!-- Label -->
+  <rect x="10" y="63" width="36" height="30" rx="2" fill="#F5EED0" opacity="0.9"/>
+  <text x="28" y="74" text-anchor="middle" fill="#5A3810" font-size="5.5" font-family="Arial" font-weight="bold">CHÂTEAU</text>
+  <line x1="12" y1="77" x2="44" y2="77" stroke="#C8A060" stroke-width="0.8"/>
+  <text x="28" y="85" text-anchor="middle" fill="#8A5C30" font-size="5" font-family="Arial">VIN ROUGE</text>
+  <text x="28" y="90" text-anchor="middle" fill="#AA7040" font-size="4.5" font-family="Arial">2023</text>
+  <!-- Glass highlight -->
+  <path d="M11,57 Q9,70 9,86" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+  <!-- Outline -->
+  <path d="M22,14 L22,36 C16,42 13,48 10,54 C8,60 7,68 7,78 L7,98 C7,105 16,110 28,110 C40,110 49,105 49,98 L49,78 C49,68 48,60 46,54 C43,48 40,42 36,36 L34,14" fill="none" stroke="#1A5820" stroke-width="1.5"/>
+</svg>

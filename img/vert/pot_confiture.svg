@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 68">
+  <!-- Shadow -->
+  <ellipse cx="32" cy="66" rx="18" ry="2.5" fill="rgba(0,0,0,0.2)"/>
+
+  <!-- Glass jar body -->
+  <!-- Outer glass shape -->
+  <rect x="10" y="24" width="44" height="38" rx="5" fill="#D4EED4" opacity="0.6"/>
+  <!-- Jam fill (red/strawberry) -->
+  <rect x="11" y="30" width="42" height="31" rx="4" fill="#C0392B"/>
+  <!-- Jam color variation (highlights) -->
+  <ellipse cx="24" cy="40" rx="6" ry="4" fill="#E74C3C" opacity="0.5"/>
+  <ellipse cx="40" cy="50" rx="5" ry="3" fill="#A93226" opacity="0.4"/>
+  <!-- Glass transparency overlay -->
+  <rect x="10" y="24" width="44" height="38" rx="5" fill="rgba(200,240,200,0.18)"/>
+
+  <!-- Metal lid -->
+  <!-- Lid body -->
+  <rect x="8" y="16" width="48" height="12" rx="4" fill="#B0B0B0"/>
+  <!-- Lid top curve -->
+  <ellipse cx="32" cy="16" rx="24" ry="5" fill="#C8C8C8"/>
+  <!-- Lid highlight -->
+  <ellipse cx="28" cy="14" rx="9" ry="2.5" fill="rgba(255,255,255,0.4)"/>
+  <!-- Lid rim line -->
+  <line x1="8" y1="24" x2="56" y2="24" stroke="#888" stroke-width="1"/>
+  <!-- Lid ridges (concentric rings) -->
+  <ellipse cx="32" cy="16" rx="14" ry="3" fill="none" stroke="#999" stroke-width="0.8"/>
+  <ellipse cx="32" cy="16" rx="8" ry="2" fill="none" stroke="#aaa" stroke-width="0.7"/>
+
+  <!-- White label on jar -->
+  <rect x="14" y="34" width="36" height="20" rx="2" fill="white" opacity="0.85"/>
+  <!-- Strawberry icon area -->
+  <circle cx="22" cy="44" r="4" fill="#E74C3C"/>
+  <path d="M20,41 Q22,38 24,41" fill="#3A8A3A" stroke="none"/>
+  <!-- Label text lines -->
+  <line x1="29" y1="41" x2="46" y2="41" stroke="#888" stroke-width="1.2"/>
+  <line x1="29" y1="44" x2="46" y2="44" stroke="#888" stroke-width="1.2"/>
+  <line x1="29" y1="47" x2="42" y2="47" stroke="#888" stroke-width="1.2"/>
+
+  <!-- Glass edge highlights -->
+  <path d="M13,28 Q12,44 13,58" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Outline -->
+  <rect x="10" y="24" width="44" height="38" rx="5" fill="none" stroke="#3A8A3A" stroke-width="1.3"/>
+</svg>
