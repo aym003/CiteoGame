@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Inject Firebase config
+      - name: Inject Firebase config into index.html
         env:
           API_KEY:              ${{ secrets.FIREBASE_API_KEY }}
           AUTH_DOMAIN:          ${{ secrets.FIREBASE_AUTH_DOMAIN }}
@@ -32,16 +32,35 @@ jobs:
           MESSAGING_SENDER_ID:  ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
           APP_ID:               ${{ secrets.FIREBASE_APP_ID }}
         run: |
-          cat > firebase-config.js << EOF
-          window.FIREBASE_CONFIG = {
-            apiKey: "$API_KEY",
-            authDomain: "$AUTH_DOMAIN",
-            projectId: "$PROJECT_ID",
-            storageBucket: "$STORAGE_BUCKET",
-            messagingSenderId: "$MESSAGING_SENDER_ID",
-            appId: "$APP_ID"
-          };
-          EOF
+          python3 - << 'PYEOF'
+          import os, re
+
+          replacement = (
+            "<script>window.FIREBASE_CONFIG = {{"
+            " apiKey: \"{API_KEY}\","
+            " authDomain: \"{AUTH_DOMAIN}\","
+            " projectId: \"{PROJECT_ID}\","
+            " storageBucket: \"{STORAGE_BUCKET}\","
+            " messagingSenderId: \"{MESSAGING_SENDER_ID}\","
+            " appId: \"{APP_ID}\""
+            " }};</script>"
+          ).format(
+            API_KEY=os.environ["API_KEY"],
+            AUTH_DOMAIN=os.environ["AUTH_DOMAIN"],
+            PROJECT_ID=os.environ["PROJECT_ID"],
+            STORAGE_BUCKET=os.environ["STORAGE_BUCKET"],
+            MESSAGING_SENDER_ID=os.environ["MESSAGING_SENDER_ID"],
+            APP_ID=os.environ["APP_ID"],
+          )
+
+          html = open("index.html").read()
+          html = re.sub(r'<script>/\* FIREBASE_CONFIG_PLACEHOLDER \*/.*?</script>', replacement, html)
+          open("index.html", "w").write(html)
+          print("Firebase config injected into index.html")
+          PYEOF
+
+      - name: Verify injection
+        run: grep -o 'FIREBASE_CONFIG = {[^}]*}' index.html | head -1
 
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3

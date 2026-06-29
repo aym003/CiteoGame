@@ -122,11 +122,11 @@
     </div>
 </div>
 
-<script src="firebase-config.js"></script>
+<script>/* FIREBASE_CONFIG_PLACEHOLDER */window.FIREBASE_CONFIG = {};</script>
 <script>
-// Firebase config is loaded from firebase-config.js (gitignored).
-// See firebase-config.example.js for the required shape.
-// In CI the file is generated from GitHub Actions secrets.
+// Firebase config injected at build time by GitHub Actions (deploy.yml).
+// Locally: copy firebase-config.example.js → firebase-config.js and load it manually,
+// or set window.FIREBASE_CONFIG before this script runs.
 
 const firebaseConfig = window.FIREBASE_CONFIG || {};
 
