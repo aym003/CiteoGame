@@ -60,7 +60,18 @@ jobs:
           PYEOF
 
       - name: Verify injection
-        run: grep -o 'FIREBASE_CONFIG = {[^}]*}' index.html | head -1
+        run: |
+          python3 - << 'PYEOF'
+          import sys
+          html = open("index.html").read()
+          if "/* FIREBASE_CONFIG_PLACEHOLDER */" in html:
+              print("ERROR: Firebase placeholder was NOT replaced — aborting deploy.")
+              sys.exit(1)
+          if "apiKey" not in html:
+              print("ERROR: apiKey not found in injected HTML — secrets may be empty.")
+              sys.exit(1)
+          print("Firebase config injection verified OK.")
+          PYEOF
 
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
