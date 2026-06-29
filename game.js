@@ -675,41 +675,42 @@ class LandingScene extends Phaser.Scene {
 
         // ── Background ────────────────────────────────────────────────────────
         this.add.rectangle(W / 2, H / 2, W, H, 0x1a2a4a);
-        this.add.rectangle(W / 2, 70, W, 140, 0x2c3e6b);
+        this.add.rectangle(W / 2, 55, W, 110, 0x2c3e6b);
 
         // ── Title ─────────────────────────────────────────────────────────────
-        this.add.text(W / 2, 36, '♻  Tri des Déchets', {
+        this.add.text(W / 2, 32, '♻  Tri des Déchets', {
             fontFamily: '"Press Start 2P"', fontSize: '14px',
             color: '#ffffff', stroke: '#000000', strokeThickness: 4,
         }).setOrigin(0.5);
 
-        this.add.text(W / 2, 76, 'Le jeu du recyclage', {
+        this.add.text(W / 2, 70, 'Le jeu du recyclage', {
             fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#aaddff',
         }).setOrigin(0.5);
 
-        // ── Bin icons (decorative) ────────────────────────────────────────────
-        this.add.image(80,     114, 'bin-jaune').setScale(1.1).setAlpha(0.8);
-        this.add.image(W / 2,  114, 'bin-noir').setScale(1.1).setAlpha(0.8);
-        this.add.image(W - 80, 114, 'bin-vert').setScale(1.1).setAlpha(0.8);
-
         // ── Separator ─────────────────────────────────────────────────────────
-        this.add.rectangle(W / 2, 150, W - 32, 2, 0x334477);
+        this.add.rectangle(W / 2, 116, W - 32, 2, 0x334477);
 
         // ── Leaderboard header ────────────────────────────────────────────────
-        this.add.text(W / 2, 172, 'Meilleurs Joueurs', {
+        this.add.text(W / 2, 140, 'Meilleurs Joueurs', {
             fontFamily: '"Press Start 2P"', fontSize: '9px', color: '#FDC602',
         }).setOrigin(0.5);
 
         // ── Column headers ────────────────────────────────────────────────────
-        this.add.text(28,     194, '#',       { fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#FDC602' }).setOrigin(0, 0.5);
-        this.add.text(68,     194, 'Pseudo',  { fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#FDC602' }).setOrigin(0, 0.5);
-        this.add.text(W - 22, 194, 'Score',   { fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#FDC602' }).setOrigin(1, 0.5);
-        this.add.rectangle(W / 2, 202, W - 32, 1, 0x334477);
+        this.add.text(28,     163, '#',      { fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#FDC602' }).setOrigin(0, 0.5);
+        this.add.text(68,     163, 'Pseudo', { fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#FDC602' }).setOrigin(0, 0.5);
+        this.add.text(W - 22, 163, 'Score',  { fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#FDC602' }).setOrigin(1, 0.5);
+        this.add.rectangle(W / 2, 172, W - 32, 1, 0x334477);
 
         // ── Rows ──────────────────────────────────────────────────────────────
         this._lbObjects = [];
         this._renderRows([]);
         this._loadAndRender();
+
+        // ── Bin icons — decorative, below leaderboard ─────────────────────────
+        const binY = H - 200;
+        this.add.image(80,     binY, 'bin-jaune').setScale(0.85).setAlpha(0.25);
+        this.add.image(W / 2,  binY, 'bin-noir').setScale(0.85).setAlpha(0.25);
+        this.add.image(W - 80, binY, 'bin-vert').setScale(0.85).setAlpha(0.25);
 
         // ── Start button ──────────────────────────────────────────────────────
         const btn = this.add.text(W / 2, H - 100, '  ▶ JOUER  ', {
@@ -735,25 +736,27 @@ class LandingScene extends Phaser.Scene {
 
     shutdown() { this._active = false; }
 
-    _renderRows(rows) {
+    _renderRows(rows, statusMsg) {
         this._lbObjects.forEach(o => o.destroy());
         this._lbObjects = [];
 
         const W      = this.scale.width;
-        const startY = 212;
+        const startY = 178;
         const rowH   = 44;
         const rankColors = ['#FFD700', '#C0C0C0', '#CD7F32'];
 
-        if (!rows.length) {
-            const t = this.add.text(W / 2, startY + 40, 'Chargement…', {
-                fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#556688',
+        if (statusMsg || !rows.length) {
+            const t = this.add.text(W / 2, startY + 50, statusMsg || 'Chargement…', {
+                fontFamily: '"Press Start 2P"', fontSize: '7px',
+                color: statusMsg ? '#ff9966' : '#556688',
+                wordWrap: { width: W - 60 }, align: 'center',
             }).setOrigin(0.5);
             this._lbObjects.push(t);
             return;
         }
 
         rows.forEach((row, i) => {
-            const y        = startY + i * rowH;
+            const y         = startY + i * rowH;
             const rankColor = i < 3 ? rankColors[i] : '#888888';
             const bgColor   = i % 2 === 0 ? 0x0d1b36 : 0x0f2040;
 
@@ -773,18 +776,24 @@ class LandingScene extends Phaser.Scene {
     }
 
     async _loadAndRender() {
-        if (typeof window.getLeaderboard !== 'function') return;
-        const rows = await window.getLeaderboard();
-        if (!this._active) return;
-        if (rows && rows.length) {
-            this._renderRows(rows);
-        } else if (!rows) {
-            this._lbObjects.forEach(o => o.destroy());
-            this._lbObjects = [];
-            const t = this.add.text(this.scale.width / 2, 252, 'Classement indisponible', {
-                fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#556688',
-            }).setOrigin(0.5);
-            this._lbObjects.push(t);
+        if (typeof window.getLeaderboard !== 'function') {
+            this._renderRows([], 'Classement indisponible');
+            return;
+        }
+        try {
+            const rows = await window.getLeaderboard();
+            if (!this._active) return;
+            if (!rows) {
+                this._renderRows([], 'Firebase non configure');
+            } else if (!rows.length) {
+                this._renderRows([], 'Aucun score encore');
+            } else {
+                this._renderRows(rows);
+            }
+        } catch (e) {
+            if (!this._active) return;
+            console.error('Leaderboard fetch failed:', e);
+            this._renderRows([], 'Erreur de connexion');
         }
     }
 }
