@@ -160,6 +160,11 @@ async function fetchTop10() {
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
+window.getLeaderboard = async function() {
+    if (!firebaseReady) return null;
+    return fetchTop10();
+};
+
 function toDocId(name) {
     return name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9_-]/g, '_');
 }

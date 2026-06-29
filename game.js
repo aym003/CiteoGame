@@ -134,13 +134,6 @@ class GameScene extends Phaser.Scene {
         this.pauseBtn.on('pointerout',  () => this.pauseBtn.setBackgroundColor('#334477'));
         this.pauseBtn.on('pointerdown', () => this.togglePause());
 
-        // Hide loader now that Phaser assets are ready
-        const loaderEl = document.getElementById('loader');
-        if (loaderEl) {
-            loaderEl.classList.add('hidden');
-            this.time.delayedCall(420, () => { loaderEl.style.display = 'none'; });
-        }
-
         // ── Space key ─────────────────────────────────────────────────────────
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
@@ -554,7 +547,7 @@ class GameScene extends Phaser.Scene {
 
         // Show leaderboard overlay once effects have played out
         this.time.delayedCall(1100, () => {
-            window.showLeaderboard(this.score, () => this.scene.restart());
+            window.showLeaderboard(this.score, () => this.scene.start('LandingScene'));
         }, [], this);
     }
 
@@ -656,6 +649,148 @@ class GameScene extends Phaser.Scene {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+class LandingScene extends Phaser.Scene {
+    constructor() { super({ key: 'LandingScene' }); }
+
+    preload() {
+        this.load.svg('bin-jaune', 'img/jaune/bin/jaune.svg', { scale: 0.1 });
+        this.load.svg('bin-noir',  'img/noir/bin/noir.svg',   { scale: 0.1 });
+        this.load.svg('bin-vert',  'img/vert/bin/vert.svg',   { scale: 0.1 });
+        TRASH_CATALOGUE.forEach(t =>
+            this.load.svg(t.key, `img/${t.bin}/${t.key}.svg`, { width: t.w, height: t.h })
+        );
+    }
+
+    create() {
+        const W = this.scale.width;
+        const H = this.scale.height;
+        this._active = true;
+
+        // Hide loader now that all assets are ready
+        const loaderEl = document.getElementById('loader');
+        if (loaderEl) {
+            loaderEl.classList.add('hidden');
+            this.time.delayedCall(420, () => { loaderEl.style.display = 'none'; });
+        }
+
+        // ── Background ────────────────────────────────────────────────────────
+        this.add.rectangle(W / 2, H / 2, W, H, 0x1a2a4a);
+        this.add.rectangle(W / 2, 70, W, 140, 0x2c3e6b);
+
+        // ── Title ─────────────────────────────────────────────────────────────
+        this.add.text(W / 2, 36, '♻  Tri des Déchets', {
+            fontFamily: '"Press Start 2P"', fontSize: '14px',
+            color: '#ffffff', stroke: '#000000', strokeThickness: 4,
+        }).setOrigin(0.5);
+
+        this.add.text(W / 2, 76, 'Le jeu du recyclage', {
+            fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#aaddff',
+        }).setOrigin(0.5);
+
+        // ── Bin icons (decorative) ────────────────────────────────────────────
+        this.add.image(80,     114, 'bin-jaune').setScale(1.1).setAlpha(0.8);
+        this.add.image(W / 2,  114, 'bin-noir').setScale(1.1).setAlpha(0.8);
+        this.add.image(W - 80, 114, 'bin-vert').setScale(1.1).setAlpha(0.8);
+
+        // ── Separator ─────────────────────────────────────────────────────────
+        this.add.rectangle(W / 2, 150, W - 32, 2, 0x334477);
+
+        // ── Leaderboard header ────────────────────────────────────────────────
+        this.add.text(W / 2, 172, 'Meilleurs Joueurs', {
+            fontFamily: '"Press Start 2P"', fontSize: '9px', color: '#FDC602',
+        }).setOrigin(0.5);
+
+        // ── Column headers ────────────────────────────────────────────────────
+        this.add.text(28,     194, '#',       { fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#FDC602' }).setOrigin(0, 0.5);
+        this.add.text(68,     194, 'Pseudo',  { fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#FDC602' }).setOrigin(0, 0.5);
+        this.add.text(W - 22, 194, 'Score',   { fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#FDC602' }).setOrigin(1, 0.5);
+        this.add.rectangle(W / 2, 202, W - 32, 1, 0x334477);
+
+        // ── Rows ──────────────────────────────────────────────────────────────
+        this._lbObjects = [];
+        this._renderRows([]);
+        this._loadAndRender();
+
+        // ── Start button ──────────────────────────────────────────────────────
+        const btn = this.add.text(W / 2, H - 100, '  ▶ JOUER  ', {
+            fontFamily: '"Press Start 2P"', fontSize: '18px',
+            color: '#ffffff', backgroundColor: '#1a9830',
+            padding: { x: 32, y: 16 },
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(10);
+
+        btn.on('pointerover', () => btn.setBackgroundColor('#22cc44'));
+        btn.on('pointerout',  () => btn.setBackgroundColor('#1a9830'));
+        btn.on('pointerdown', () => this.scene.start('GameScene'));
+
+        this.tweens.add({
+            targets: btn, scaleX: 1.05, scaleY: 1.05,
+            duration: 820, ease: 'Sine.InOut', yoyo: true, repeat: -1,
+        });
+
+        // ── Footer ────────────────────────────────────────────────────────────
+        this.add.text(W / 2, H - 24, 'Citeo 2025', {
+            fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#334477',
+        }).setOrigin(0.5);
+    }
+
+    shutdown() { this._active = false; }
+
+    _renderRows(rows) {
+        this._lbObjects.forEach(o => o.destroy());
+        this._lbObjects = [];
+
+        const W      = this.scale.width;
+        const startY = 212;
+        const rowH   = 44;
+        const rankColors = ['#FFD700', '#C0C0C0', '#CD7F32'];
+
+        if (!rows.length) {
+            const t = this.add.text(W / 2, startY + 40, 'Chargement…', {
+                fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#556688',
+            }).setOrigin(0.5);
+            this._lbObjects.push(t);
+            return;
+        }
+
+        rows.forEach((row, i) => {
+            const y        = startY + i * rowH;
+            const rankColor = i < 3 ? rankColors[i] : '#888888';
+            const bgColor   = i % 2 === 0 ? 0x0d1b36 : 0x0f2040;
+
+            const bg       = this.add.rectangle(W / 2, y + rowH / 2, W - 32, rowH - 3, bgColor);
+            const rankTxt  = this.add.text(28,     y + rowH / 2, `${i + 1}`, {
+                fontFamily: '"Press Start 2P"', fontSize: '9px', color: rankColor,
+            }).setOrigin(0, 0.5);
+            const nameTxt  = this.add.text(68,     y + rowH / 2, row.name || '???', {
+                fontFamily: '"Press Start 2P"', fontSize: '8px', color: '#ffffff',
+            }).setOrigin(0, 0.5);
+            const scoreTxt = this.add.text(W - 22, y + rowH / 2, `${row.score} pts`, {
+                fontFamily: '"Press Start 2P"', fontSize: '8px', color: '#00FF88',
+            }).setOrigin(1, 0.5);
+
+            this._lbObjects.push(bg, rankTxt, nameTxt, scoreTxt);
+        });
+    }
+
+    async _loadAndRender() {
+        if (typeof window.getLeaderboard !== 'function') return;
+        const rows = await window.getLeaderboard();
+        if (!this._active) return;
+        if (rows && rows.length) {
+            this._renderRows(rows);
+        } else if (!rows) {
+            this._lbObjects.forEach(o => o.destroy());
+            this._lbObjects = [];
+            const t = this.add.text(this.scale.width / 2, 252, 'Classement indisponible', {
+                fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#556688',
+            }).setOrigin(0.5);
+            this._lbObjects.push(t);
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 class HelpScene extends Phaser.Scene {
     constructor() { super({ key: 'HelpScene' }); }
 
@@ -736,7 +871,7 @@ const config = {
     type: Phaser.AUTO,
     width: 600, height: 900,
     backgroundColor: '#111111',
-    scene: [GameScene, HelpScene],
+    scene: [LandingScene, GameScene, HelpScene],
     parent: document.body,
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
 };
