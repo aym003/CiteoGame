@@ -74,6 +74,7 @@ function getMultiplier(combo) {
 const BIN_HALF_W = 48;
 const BIN_OPEN_Y = -55;
 const CATCH_H    = 50;
+const SIDEBAR_W  = 110;
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -93,11 +94,12 @@ class GameScene extends Phaser.Scene {
         const W = this.scale.width;
         const H = this.scale.height;
 
-        this.score       = 0;
-        this.items       = [];
-        this.isOver      = false;
-        this.isPaused    = false;
-        this.fallSpeed   = 180;
+        this.score          = 0;
+        this.items          = [];
+        this.isOver         = false;
+        this.isPaused       = false;
+        this.isTeachingPause = false;
+        this.fallSpeed      = 180;
         this.combo            = 0;
         this._wrongPopupGroup = null;
         this.timeLeft         = ROUND_TIME;
@@ -193,6 +195,38 @@ class GameScene extends Phaser.Scene {
             delay: 1800, callback: this.spawnItem, callbackScope: this, loop: true,
         });
         this.time.delayedCall(600, this.spawnItem, [], this);
+
+        // ── Sidebar: bin reference guide ──────────────────────────────────────
+        const sidebarH  = H - 130;
+        const sidebarCY = 130 + sidebarH / 2;
+        const scx       = W - SIDEBAR_W / 2;
+
+        this.add.rectangle(scx, sidebarCY, SIDEBAR_W, sidebarH, 0x060c1a, 0.93).setDepth(20);
+        this.add.rectangle(W - SIDEBAR_W, sidebarCY, 2, sidebarH, 0x334477).setDepth(20);
+
+        this.add.text(scx, 142, 'GUIDE', {
+            fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#445566',
+        }).setOrigin(0.5).setDepth(21);
+
+        const SIDEBAR_BINS = [
+            { id: 'jaune', color: '#FDC602', short: 'JAUNE', desc: 'Carton, Plastique, Métal, Papier' },
+            { id: 'noir',  color: '#BBBBBB', short: 'NOIR',  desc: 'Alimentaire, Composites' },
+            { id: 'vert',  color: '#44EE88', short: 'VERT',  desc: 'Verre uniquement' },
+        ];
+
+        let sy = 162;
+        for (const s of SIDEBAR_BINS) {
+            this.add.image(scx, sy + 20, `bin-${s.id}`).setScale(0.7).setDepth(21);
+            this.add.text(scx, sy + 50, s.short, {
+                fontFamily: '"Press Start 2P"', fontSize: '6px', color: s.color,
+            }).setOrigin(0.5).setDepth(21);
+            this.add.text(scx, sy + 64, s.desc, {
+                fontFamily: '"Press Start 2P"', fontSize: '5px', color: '#667788',
+                align: 'center', wordWrap: { width: 96 }, lineSpacing: 2,
+            }).setOrigin(0.5, 0).setDepth(21);
+            this.add.rectangle(scx, sy + 116, SIDEBAR_W - 16, 1, 0x223344).setDepth(21);
+            sy += 124;
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -257,7 +291,7 @@ class GameScene extends Phaser.Scene {
         const wrong   = TRASH_CATALOGUE.filter(t => t.bin !== binId);
         const pool    = Math.random() < 0.6 ? correct : wrong;
         const def     = Phaser.Utils.Array.GetRandom(pool);
-        const img     = this.add.image(Phaser.Math.Between(55, W - 55), -60, def.key).setDepth(4);
+        const img     = this.add.image(Phaser.Math.Between(55, W - SIDEBAR_W - 10), -60, def.key).setDepth(4);
         img.binCategory = def.bin;
         img.itemKey     = def.key;
         img.speed       = this.fallSpeed;
@@ -429,6 +463,7 @@ class GameScene extends Phaser.Scene {
             });
 
             this.showWrongBinPopup(item);
+            this.startTeachingPause();
         }
 
         this.refreshComboDisplay();
@@ -455,7 +490,7 @@ class GameScene extends Phaser.Scene {
         const name   = (item.itemKey || '').replace(/_/g, ' ');
         const border = parseInt(info.color.replace('#', ''), 16);
 
-        const popX = W / 2;
+        const popX = (W - SIDEBAR_W) / 2;
         const popY = 295;
         const PW   = 390;
         const PH   = 108;
@@ -499,6 +534,41 @@ class GameScene extends Phaser.Scene {
                 });
             },
         });
+    }
+
+    // ── Teaching pause: freeze game so player can read the wrong-bin tip ─────
+    startTeachingPause() {
+        if (this.isTeachingPause || this.isOver) return;
+        this.isTeachingPause     = true;
+        this.isPaused            = true;
+        this.roundTimer.paused   = true;
+        this.binRotateTimer.paused = true;
+        this.spawnTimer.paused   = true;
+
+        const cx = (this.scale.width - SIDEBAR_W) / 2;
+        this._teachHint = this.add.text(cx, 378, 'Appuie pour continuer', {
+            fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#888888', align: 'center',
+        }).setOrigin(0.5).setDepth(40).setAlpha(0);
+        this.tweens.add({ targets: this._teachHint, alpha: 1, delay: 350, duration: 200 });
+
+        const resume = () => this.endTeachingPause();
+        this._teachPointerHandler = resume;
+        this._teachResumeTimer    = this.time.delayedCall(3000, resume, [], this);
+        this.input.once('pointerdown', resume);
+    }
+
+    endTeachingPause() {
+        if (!this.isTeachingPause) return;
+        this.isTeachingPause       = false;
+        this.isPaused              = false;
+        this.roundTimer.paused     = false;
+        this.binRotateTimer.paused = false;
+        this.spawnTimer.paused     = false;
+
+        if (this._teachHint)        { this._teachHint.destroy(); this._teachHint = null; }
+        if (this._teachResumeTimer) { this._teachResumeTimer.remove(false); this._teachResumeTimer = null; }
+        this.input.off('pointerdown', this._teachPointerHandler);
+        this._teachPointerHandler = null;
     }
 
     // ── Time's up ─────────────────────────────────────────────────────────────
@@ -553,7 +623,7 @@ class GameScene extends Phaser.Scene {
 
     // ── Pause / resume ────────────────────────────────────────────────────────
     togglePause() {
-        if (this.isOver) return;
+        if (this.isOver || this.isTeachingPause) return;
         this.isPaused = !this.isPaused;
 
         if (this.isPaused) {
@@ -579,13 +649,13 @@ class GameScene extends Phaser.Scene {
 
     // ── UPDATE — game loop ────────────────────────────────────────────────────
     update() {
-        if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) this.togglePause();
+        if (Phaser.Input.Keyboard.JustDown(this.spaceKey) && !this.isTeachingPause) this.togglePause();
         if (this.isOver || this.isPaused) return;
 
         const W  = this.scale.width;
         const dt = this.game.loop.delta / 1000;
 
-        const bx    = Phaser.Math.Clamp(this.input.x, BIN_HALF_W, W - BIN_HALF_W);
+        const bx    = Phaser.Math.Clamp(this.input.x, BIN_HALF_W, W - SIDEBAR_W - BIN_HALF_W);
         this.binSprite.x = bx;
 
         const openY = this.binY + BIN_OPEN_Y;

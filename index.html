@@ -123,11 +123,20 @@
 </div>
 
 <script>/* FIREBASE_CONFIG_PLACEHOLDER */window.FIREBASE_CONFIG = {};</script>
-<!-- Local dev: firebase-config.js overrides the placeholder above. In production the
-     placeholder is replaced by CI so this 404s silently (onerror suppresses the error). -->
-<script src="firebase-config.js" onerror="this.remove()"></script>
 <script>
-// CI injects real config into the placeholder above; local dev loads firebase-config.js.
+// fetch() returns a 404 response (no console error); <script src> logs it unconditionally.
+// In production, CI already replaced the placeholder above so we skip the fetch entirely.
+(async function () {
+if (!window.FIREBASE_CONFIG || !window.FIREBASE_CONFIG.apiKey) {
+    try {
+        const r = await fetch('firebase-config.js');
+        if (r.ok) {
+            const s = document.createElement('script');
+            s.textContent = await r.text();
+            document.head.appendChild(s);
+        }
+    } catch (_) {}
+}
 
 const firebaseConfig = window.FIREBASE_CONFIG || {};
 
@@ -263,6 +272,7 @@ window.showLeaderboard = async function(finalScore, onReplay) {
         onReplay();
     };
 };
+})();
 </script>
 
 <script src="game.js"></script>
