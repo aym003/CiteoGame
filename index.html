@@ -123,10 +123,11 @@
 </div>
 
 <script>/* FIREBASE_CONFIG_PLACEHOLDER */window.FIREBASE_CONFIG = {};</script>
+<!-- Local dev: firebase-config.js overrides the placeholder above. In production the
+     placeholder is replaced by CI so this 404s silently (onerror suppresses the error). -->
+<script src="firebase-config.js" onerror="this.remove()"></script>
 <script>
-// Firebase config injected at build time by GitHub Actions (deploy.yml).
-// Locally: copy firebase-config.example.js → firebase-config.js and load it manually,
-// or set window.FIREBASE_CONFIG before this script runs.
+// CI injects real config into the placeholder above; local dev loads firebase-config.js.
 
 const firebaseConfig = window.FIREBASE_CONFIG || {};
 
