@@ -1,24 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 35">
-  <!-- Shadow -->
-  <ellipse cx="50" cy="33" rx="40" ry="2.5" fill="rgba(0,0,0,0.18)"/>
+  <ellipse cx="50" cy="33.5" rx="42" ry="1.8" fill="rgba(0,0,0,0.15)"/>
   <!-- Handle -->
-  <path d="M8,14 Q8,8 14,8 L68,8 Q74,8 74,14 L74,22 Q74,28 68,28 L14,28 Q8,28 8,22 Z" fill="#FF6699"/>
-  <!-- Handle highlight -->
-  <path d="M14,9 L68,9" stroke="rgba(255,255,255,0.4)" stroke-width="3" stroke-linecap="round"/>
-  <!-- Handle grip ridges -->
-  <rect x="20" y="11" width="4" height="14" rx="2" fill="#DD4477" opacity="0.5"/>
-  <rect x="28" y="11" width="4" height="14" rx="2" fill="#DD4477" opacity="0.5"/>
-  <rect x="36" y="11" width="4" height="14" rx="2" fill="#DD4477" opacity="0.5"/>
-  <!-- Head base -->
-  <path d="M74,12 L92,12 Q96,12 96,16 L96,20 Q96,24 92,24 L74,24 Z" fill="#FFFFFF"/>
-  <path d="M74,12 L92,12 Q96,12 96,16 L96,20 Q96,24 92,24 L74,24 Z" fill="none" stroke="#DDDDDD" stroke-width="1"/>
-  <!-- Bristles -->
-  <rect x="77" y="7" width="3" height="6" rx="1.5" fill="#FF6699"/>
-  <rect x="82" y="7" width="3" height="6" rx="1.5" fill="#FF6699"/>
-  <rect x="87" y="7" width="3" height="6" rx="1.5" fill="#FFFFFF" stroke="#DDDDDD" stroke-width="0.5"/>
-  <rect x="77" y="23" width="3" height="6" rx="1.5" fill="#FF6699"/>
-  <rect x="82" y="23" width="3" height="6" rx="1.5" fill="#FF6699"/>
-  <rect x="87" y="23" width="3" height="6" rx="1.5" fill="#FFFFFF" stroke="#DDDDDD" stroke-width="0.5"/>
-  <!-- Outline handle -->
-  <path d="M8,14 Q8,8 14,8 L68,8 Q74,8 74,14 L74,22 Q74,28 68,28 L14,28 Q8,28 8,22 Z" fill="none" stroke="#CC4477" stroke-width="1.5"/>
+  <rect x="4" y="11" width="64" height="13" rx="6.5" fill="#E84080"/>
+  <path d="M10,13 L60,13" stroke="rgba(255,255,255,0.45)" stroke-width="3" stroke-linecap="round"/>
+  <rect x="4" y="11" width="64" height="13" rx="6.5" fill="none" stroke="#B02050" stroke-width="1.5"/>
+  <!-- Neck -->
+  <path d="M68,13.5 L80,12 Q84,12 84,17.5 Q84,23 80,23 L68,21.5 Z" fill="#E8E8E8" stroke="#CCCCCC" stroke-width="1"/>
+  <!-- Head plate -->
+  <rect x="82" y="10" width="14" height="15" rx="3" fill="#FAFAFA" stroke="#CCCCCC" stroke-width="1.2"/>
+  <!-- Bristle tufts top -->
+  <rect x="84" y="3" width="3.5" height="8.5" rx="1.75" fill="#E84080"/>
+  <rect x="89" y="3" width="3.5" height="8.5" rx="1.75" fill="#2288EE"/>
+  <rect x="94" y="3" width="3.5" height="8.5" rx="1.75" fill="#E84080"/>
+  <!-- Bristle tufts bottom -->
+  <rect x="84" y="23.5" width="3.5" height="8.5" rx="1.75" fill="#E84080"/>
+  <rect x="89" y="23.5" width="3.5" height="8.5" rx="1.75" fill="#2288EE"/>
+  <rect x="94" y="23.5" width="3.5" height="8.5" rx="1.75" fill="#E84080"/>
 </svg>

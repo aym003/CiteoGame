@@ -46,7 +46,7 @@ const WRONG_BIN_TIPS = {
     couche:             "Les couches = déchets ménagers — bac noir.",
     sachet_chips:       "Emballages souples non recyclables — bac noir.",
     brosse_dents:       "Plastiques composites = bac noir.",
-    polystyrene:        "Le polystyrène ne se recycle pas — bac noir.",
+    polystyrene:        "Les barquettes en polystyrène ne se recyclent pas — bac noir.",
     bouteille_verre:    "Le verre se recycle à l'infini — bac vert !",
     bocal:              "Les bocaux en verre vont au bac vert.",
     bouteille_vin:      "Toutes les bouteilles en verre = bac vert.",
@@ -246,6 +246,12 @@ class GameScene extends Phaser.Scene {
 
     rotateBin() {
         if (this.isOver) return;
+        const H = this.scale.height;
+        const anyLow = this.items.some(it => it.y > H * 0.5);
+        if (anyLow) {
+            this.time.delayedCall(400, this.rotateBin, [], this);
+            return;
+        }
         this.binIndex = (this.binIndex + 1) % BIN_CYCLE.length;
         const binId = BIN_CYCLE[this.binIndex];
         const info  = BIN_INFO[binId];
