@@ -1,9 +1,15 @@
 const fs   = require('fs');
 const path = require('path');
 
-const COLORS     = ['jaune', 'vert', 'noir'];
+const game   = process.argv[2] || 'game1';
+const COLORS = ['jaune', 'vert', 'noir'];
 const ITEM_SCALE = 0.75;
-const imgDir     = path.join(__dirname, '../img');
+const imgDir = path.join(__dirname, `../games/${game}/img`);
+
+if (!fs.existsSync(imgDir)) {
+    console.error(`img dir not found: ${imgDir}`);
+    process.exit(1);
+}
 
 function readViewBox(filepath) {
     const src = fs.readFileSync(filepath, 'utf8');
@@ -38,11 +44,11 @@ for (const color of COLORS) {
     manifest[color] = { bins, items };
 }
 
-// Write as a JS file (loaded via <script> tag — no XHR needed, works with file://)
 const js = `window.BIN_MANIFEST = ${JSON.stringify(manifest, null, 2)};\n`;
 fs.writeFileSync(path.join(imgDir, 'bins.js'), js);
+fs.writeFileSync(path.join(imgDir, 'bins.json'), JSON.stringify(manifest, null, 2) + '\n');
 
-console.log('bins.js updated:');
+console.log(`bins.js updated for ${game}:`);
 for (const [color, { bins, items }] of Object.entries(manifest)) {
     console.log(`  ${color}: ${bins.length} bin skin(s), ${items.length} item(s) [${items.map(i => i.file).join(', ')}]`);
 }

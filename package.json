@@ -2,10 +2,10 @@
   "name": "CiteoGame",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "scan": "node scripts/scan-bins.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "scan": "node scripts/scan-bins.js game1",
+    "scan:game1": "node scripts/scan-bins.js game1",
+    "scan:game2": "node scripts/scan-bins.js game2"
   },
   "private": true
 }

@@ -38,6 +38,11 @@ window.BIN_MANIFEST = {
         "file": "plastique.svg",
         "w": 45,
         "h": 75
+      },
+      {
+        "file": "sachet_chips.svg",
+        "w": 53,
+        "h": 68
       }
     ]
   },
@@ -105,18 +110,13 @@ window.BIN_MANIFEST = {
       },
       {
         "file": "polystyrene.svg",
-        "w": 56,
-        "h": 64
+        "w": 53,
+        "h": 56
       },
       {
         "file": "pomme.svg",
         "w": 53,
         "h": 60
-      },
-      {
-        "file": "sachet_chips.svg",
-        "w": 53,
-        "h": 68
       }
     ]
   }

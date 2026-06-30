@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// TRI DES DÉCHETS — 60-second time attack, bin rotation, combo × speed
+// TRI DES DÉCHETS — survival mode, exponential speed, 3 lives
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TRASH_CATALOGUE = [
@@ -14,7 +14,7 @@ const TRASH_CATALOGUE = [
     { key: 'banane',          bin: 'noir',  w: 78, h: 52 },
     { key: 'mouchoir',        bin: 'noir',  w: 68, h: 60 },
     { key: 'couche',          bin: 'noir',  w: 88, h: 60 },
-    { key: 'sachet_chips',    bin: 'noir',  w: 58, h: 75 },
+    { key: 'sachet_chips',    bin: 'jaune', w: 58, h: 75 },
     { key: 'brosse_dents',    bin: 'noir',  w: 88, h: 30 },
     { key: 'polystyrene',     bin: 'noir',  w: 62, h: 72 },
     { key: 'bouteille_verre', bin: 'vert',  w: 40, h: 80 },
@@ -44,7 +44,7 @@ const WRONG_BIN_TIPS = {
     banane:             "Les épluchures sont des déchets organiques.",
     mouchoir:           "Mouchoir usagé = non recyclable — bac noir.",
     couche:             "Les couches = déchets ménagers — bac noir.",
-    sachet_chips:       "Emballages souples non recyclables — bac noir.",
+    sachet_chips:       "Les emballages souples se recyclent au bac jaune !",
     brosse_dents:       "Plastiques composites = bac noir.",
     polystyrene:        "Les barquettes en polystyrène ne se recyclent pas — bac noir.",
     bouteille_verre:    "Le verre se recycle à l'infini — bac vert !",
@@ -58,7 +58,7 @@ const WRONG_BIN_TIPS = {
 // Combo colours — gold → orange → red → magenta
 const COMBO_COLORS = ['#FFD700', '#FF9900', '#FF6600', '#FF4500', '#FF00FF'];
 
-const ROUND_TIME       = 60;   // seconds
+const MAX_LIVES        = 3;
 const BIN_ROTATE_EVERY = 8;    // seconds between bin changes
 
 function getMultiplier(combo) {
@@ -82,11 +82,11 @@ class GameScene extends Phaser.Scene {
     constructor() { super({ key: 'GameScene' }); }
 
     preload() {
-        this.load.svg('bin-jaune', 'img/jaune/bin/jaune.svg', { scale: 0.1 });
-        this.load.svg('bin-noir',  'img/noir/bin/noir.svg',   { scale: 0.1 });
-        this.load.svg('bin-vert',  'img/vert/bin/vert.svg',   { scale: 0.1 });
+        this.load.svg('bin-jaune', 'games/game1/img/jaune/bin/jaune.svg', { scale: 0.1 });
+        this.load.svg('bin-noir',  'games/game1/img/noir/bin/noir.svg',   { scale: 0.1 });
+        this.load.svg('bin-vert',  'games/game1/img/vert/bin/vert.svg',   { scale: 0.1 });
         TRASH_CATALOGUE.forEach(t =>
-            this.load.svg(t.key, `img/${t.bin}/${t.key}.svg`, { width: t.w, height: t.h })
+            this.load.svg(t.key, `games/game1/img/${t.bin}/${t.key}.svg`, { width: t.w, height: t.h })
         );
     }
 
@@ -94,15 +94,15 @@ class GameScene extends Phaser.Scene {
         const W = this.scale.width;
         const H = this.scale.height;
 
-        this.score          = 0;
-        this.items          = [];
-        this.isOver         = false;
-        this.isPaused       = false;
+        this.score           = 0;
+        this.lives           = MAX_LIVES;
+        this.items           = [];
+        this.isOver          = false;
+        this.isPaused        = false;
         this.isTeachingPause = false;
-        this.fallSpeed      = 180;
-        this.combo            = 0;
+        this.fallSpeed       = 180;
+        this.combo           = 0;
         this._wrongPopupGroup = null;
-        this.timeLeft         = ROUND_TIME;
         this.timeElapsed = 0;
         this.binIndex    = 0;
 
@@ -148,9 +148,22 @@ class GameScene extends Phaser.Scene {
             fontFamily: '"Press Start 2P"', fontSize: '28px',
             color: '#ffffff', stroke: '#000000', strokeThickness: 6,
         }).setOrigin(0.5).setDepth(61).setVisible(false);
-        this.pauseHint = this.add.text(W / 2, H / 2 + 22, 'Espace ou ⏸ pour reprendre', {
+        this.pauseHint = this.add.text(W / 2, H / 2 + 14, 'Espace ou ⏸ pour reprendre', {
             fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#aaaaaa',
         }).setOrigin(0.5).setDepth(61).setVisible(false);
+
+        this.restartBtn = this.add.text(W / 2, H / 2 + 62, '  ↺ REJOUER  ', {
+            fontFamily: '"Press Start 2P"', fontSize: '11px',
+            color: '#ffffff', backgroundColor: '#7a2200',
+            padding: { x: 16, y: 10 },
+        }).setOrigin(0.5).setDepth(62).setVisible(false)
+            .setInteractive({ useHandCursor: true });
+        this.restartBtn.on('pointerover', () => this.restartBtn.setBackgroundColor('#aa3300'));
+        this.restartBtn.on('pointerout',  () => this.restartBtn.setBackgroundColor('#7a2200'));
+        this.restartBtn.on('pointerdown', (ptr, lx, ly, evt) => {
+            evt.stopPropagation();
+            this.scene.start('GameScene');
+        });
 
         // ── Active bin label ──────────────────────────────────────────────────
         this.binLabelText = this.add.text(W / 2, 58, BIN_INFO.jaune.label, {
@@ -167,14 +180,14 @@ class GameScene extends Phaser.Scene {
             color: '#FFD700', stroke: '#000000', strokeThickness: 3,
         }).setOrigin(0.5, 0).setDepth(10).setAlpha(0);
 
-        this.timerText = this.add.text(W - 14, 80, '1:00', {
+        this.livesText = this.add.text(W - 14, 77, '♥ ♥ ♥', {
             fontFamily: '"Press Start 2P"', fontSize: '18px',
-            color: '#00FF88', stroke: '#000000', strokeThickness: 4,
+            color: '#FF4466', stroke: '#000000', strokeThickness: 3,
         }).setOrigin(1, 0).setDepth(10);
 
-        // ── Timer bar ─────────────────────────────────────────────────────────
+        // ── Speed bar ─────────────────────────────────────────────────────────
         this.add.rectangle(W / 2, 125, W - 32, 12, 0x333333).setOrigin(0.5);
-        this.timerBar = this.add.rectangle(16, 125, W - 32, 8, 0x00CC66).setOrigin(0, 0.5);
+        this.speedBar = this.add.rectangle(16, 125, 0, 8, 0x00CC66).setOrigin(0, 0.5);
 
         // ── Bin ───────────────────────────────────────────────────────────────
         this.binY = H - 90;
@@ -233,15 +246,7 @@ class GameScene extends Phaser.Scene {
 
     tickTimer() {
         if (this.isOver) return;
-        this.timeLeft--;
         this.timeElapsed++;
-        this.updateTimerDisplay();
-
-        // Final 10s: urgent flash each second
-        if (this.timeLeft <= 10 && this.timeLeft > 0) {
-            this.screenFlash(0xFF4400, 0.12);
-        }
-        if (this.timeLeft <= 0) this.endGame();
     }
 
     rotateBin() {
@@ -287,6 +292,29 @@ class GameScene extends Phaser.Scene {
                 });
             },
         });
+    }
+
+    // ── Lives ─────────────────────────────────────────────────────────────────
+    updateLivesDisplay() {
+        const display = Array.from({ length: MAX_LIVES }, (_, i) => i < this.lives ? '♥' : '♡').join(' ');
+        this.livesText.setText(display);
+        this.tweens.add({
+            targets: this.livesText, scaleX: 1.4, scaleY: 1.4,
+            duration: 100, ease: 'Back.Out', yoyo: true,
+        });
+    }
+
+    loseLife() {
+        this.lives--;
+        this.updateLivesDisplay();
+        this.screenFlash(0xFF0000, 0.35);
+        this.cameras.main.shake(300, 0.015);
+
+        if (this.lives <= 0) {
+            this.endGame();
+        } else {
+            this.startTeachingPause();
+        }
     }
 
     spawnItem() {
@@ -453,23 +481,19 @@ class GameScene extends Phaser.Scene {
             if (this.combo >= 2) this.showComboLabel(this.combo);
 
         } else {
-            this.score = Math.max(0, this.score - 10);
             this.combo = 0;
 
-            this.screenFlash(0xFF0000, 0.22);
-            this.cameras.main.shake(240, 0.011);
-
-            const skull = this.add.text(item.x, item.y - 18, '-10 !!', {
-                fontFamily: '"Press Start 2P"', fontSize: '16px',
+            const heartLost = this.add.text(item.x, item.y - 18, '💔 -1 VIE', {
+                fontFamily: '"Press Start 2P"', fontSize: '13px',
                 color: '#FF3333', stroke: '#000000', strokeThickness: 5,
             }).setOrigin(0.5).setDepth(22);
             this.tweens.add({
-                targets: skull, y: skull.y - 75, alpha: 0, duration: 820, ease: 'Power2',
-                onComplete: () => skull.destroy(),
+                targets: heartLost, y: heartLost.y - 75, alpha: 0, duration: 820, ease: 'Power2',
+                onComplete: () => heartLost.destroy(),
             });
 
             this.showWrongBinPopup(item);
-            this.startTeachingPause();
+            this.loseLife();
         }
 
         this.refreshComboDisplay();
@@ -577,7 +601,7 @@ class GameScene extends Phaser.Scene {
         this._teachPointerHandler = null;
     }
 
-    // ── Time's up ─────────────────────────────────────────────────────────────
+    // ── Game over (no more lives) ─────────────────────────────────────────────
     endGame() {
         this.isOver = true;
         this.spawnTimer.remove();
@@ -589,36 +613,45 @@ class GameScene extends Phaser.Scene {
         const W = this.scale.width;
         const H = this.scale.height;
 
-        this.screenFlash(0xFFD700, 0.65);
-        this.spawnParticles(W / 2, H / 2, 30, 0xFFD700);
-        this.spawnParticles(W / 2, H / 2, 20, 0x00FF88);
+        this.screenFlash(0xFF0000, 0.65);
+        this.spawnParticles(W / 2, H / 2, 30, 0xFF4466);
+        this.spawnParticles(W / 2, H / 2, 20, 0xFFD700);
 
         // Rating based on score
         let rating, ratingColor;
-        if      (this.score >= 800) { rating = 'Expert du Tri !';    ratingColor = '#FF00FF'; }
-        else if (this.score >= 500) { rating = 'Champion !';         ratingColor = '#FFD700'; }
-        else if (this.score >= 300) { rating = 'Bon Recycleur';      ratingColor = '#00FF88'; }
+        if      (this.score >= 800) { rating = 'Expert du Tri !';  ratingColor = '#FF00FF'; }
+        else if (this.score >= 500) { rating = 'Champion !';       ratingColor = '#FFD700'; }
+        else if (this.score >= 300) { rating = 'Bon Recycleur';    ratingColor = '#00FF88'; }
         else if (this.score >= 150) { rating = 'En Apprentissage'; ratingColor = '#AAAAAA'; }
-        else                        { rating = 'Débutant';           ratingColor = '#888888'; }
+        else                        { rating = 'Débutant';         ratingColor = '#888888'; }
+
+        const mins = Math.floor(this.timeElapsed / 60);
+        const secs = this.timeElapsed % 60;
+        const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
 
         this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.82).setDepth(30);
 
-        this.add.text(W / 2, H / 2 - 175, '⏱', { fontSize: '72px' })
+        this.add.text(W / 2, H / 2 - 175, '💀', { fontSize: '72px' })
             .setOrigin(0.5).setDepth(31);
 
-        this.add.text(W / 2, H / 2 - 100, 'Temps écoulé !', {
-            fontFamily: '"Press Start 2P"', fontSize: '18px',
-            color: '#ffffff', stroke: '#000000', strokeThickness: 5,
+        this.add.text(W / 2, H / 2 - 100, 'GAME OVER', {
+            fontFamily: '"Press Start 2P"', fontSize: '22px',
+            color: '#FF4466', stroke: '#000000', strokeThickness: 5,
         }).setOrigin(0.5).setDepth(31);
 
-        this.add.text(W / 2, H / 2 - 38, rating, {
-            fontFamily: '"Press Start 2P"', fontSize: '16px',
+        this.add.text(W / 2, H / 2 - 48, rating, {
+            fontFamily: '"Press Start 2P"', fontSize: '14px',
             color: ratingColor, stroke: '#000000', strokeThickness: 4,
         }).setOrigin(0.5).setDepth(31);
 
-        this.add.text(W / 2, H / 2 + 32, `Score final\n${this.score} pts`, {
+        this.add.text(W / 2, H / 2 + 16, `Score final\n${this.score} pts`, {
             fontFamily: '"Press Start 2P"', fontSize: '15px',
             color: '#FFD700', align: 'center', lineSpacing: 10,
+        }).setOrigin(0.5).setDepth(31);
+
+        this.add.text(W / 2, H / 2 + 82, `Survie : ${timeStr}`, {
+            fontFamily: '"Press Start 2P"', fontSize: '9px',
+            color: '#aaaaaa',
         }).setOrigin(0.5).setDepth(31);
 
         // Show leaderboard overlay once effects have played out
@@ -640,6 +673,7 @@ class GameScene extends Phaser.Scene {
             this.pauseOverlay.setVisible(true);
             this.pauseLabel.setVisible(true);
             this.pauseHint.setVisible(true);
+            this.restartBtn.setVisible(true);
             this.pauseBtn.setText(' ▶ ');
         } else {
             this.roundTimer.paused     = false;
@@ -649,6 +683,7 @@ class GameScene extends Phaser.Scene {
             this.pauseOverlay.setVisible(false);
             this.pauseLabel.setVisible(false);
             this.pauseHint.setVisible(false);
+            this.restartBtn.setVisible(false);
             this.pauseBtn.setText(' ⏸ ');
         }
     }
@@ -693,34 +728,15 @@ class GameScene extends Phaser.Scene {
             }
         }
 
-        // Speed = base + time-driven acceleration + combo bonus
-        this.fallSpeed        = 180 + this.timeElapsed * 1.2 + this.combo * 10;
-        // Spawn rate tightens over time and with combo
-        this.spawnTimer.delay = Math.max(450, 1800 - this.timeElapsed * 12 - this.combo * 15);
+        // Exponential speed (Tetris-like) + small combo boost
+        this.fallSpeed        = Math.min(950, 180 * Math.pow(1.012, this.timeElapsed) + this.combo * 8);
+        this.spawnTimer.delay = Math.max(350, Math.floor(1800 * Math.pow(0.993, this.timeElapsed)));
+        // Update speed bar
+        const speedRatio = Math.min((this.fallSpeed - 180) / 770, 1);
+        this.speedBar.width = speedRatio * (W - 32);
+        this.speedBar.setFillStyle(speedRatio > 0.7 ? 0xFF3333 : (speedRatio > 0.4 ? 0xFF9900 : 0x00CC66));
     }
 
-    // ── Timer display + bar ───────────────────────────────────────────────────
-    updateTimerDisplay() {
-        const W    = this.scale.width;
-        const mins = Math.floor(this.timeLeft / 60);
-        const secs = this.timeLeft % 60;
-        this.timerText.setText(`${mins}:${secs.toString().padStart(2, '0')}`);
-
-        if (this.timeLeft <= 10) {
-            this.timerText.setColor('#FF3333');
-            this.tweens.add({
-                targets: this.timerText, scaleX: 1.25, scaleY: 1.25,
-                duration: 80, ease: 'Power2', yoyo: true,
-            });
-        } else if (this.timeLeft <= 20) {
-            this.timerText.setColor('#FF9900');
-        }
-
-        const ratio    = this.timeLeft / ROUND_TIME;
-        const barColor = this.timeLeft <= 10 ? 0xFF3333 : (this.timeLeft <= 20 ? 0xFF9900 : 0x00CC66);
-        this.timerBar.width = ratio * (W - 32);
-        this.timerBar.setFillStyle(barColor);
-    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -729,11 +745,11 @@ class LandingScene extends Phaser.Scene {
     constructor() { super({ key: 'LandingScene' }); }
 
     preload() {
-        this.load.svg('bin-jaune', 'img/jaune/bin/jaune.svg', { scale: 0.1 });
-        this.load.svg('bin-noir',  'img/noir/bin/noir.svg',   { scale: 0.1 });
-        this.load.svg('bin-vert',  'img/vert/bin/vert.svg',   { scale: 0.1 });
+        this.load.svg('bin-jaune', 'games/game1/img/jaune/bin/jaune.svg', { scale: 0.1 });
+        this.load.svg('bin-noir',  'games/game1/img/noir/bin/noir.svg',   { scale: 0.1 });
+        this.load.svg('bin-vert',  'games/game1/img/vert/bin/vert.svg',   { scale: 0.1 });
         TRASH_CATALOGUE.forEach(t =>
-            this.load.svg(t.key, `img/${t.bin}/${t.key}.svg`, { width: t.w, height: t.h })
+            this.load.svg(t.key, `games/game1/img/${t.bin}/${t.key}.svg`, { width: t.w, height: t.h })
         );
     }
 
